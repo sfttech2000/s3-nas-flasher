@@ -1,0 +1,19 @@
+{
+  "name": "S3-NAS",
+  "version": "1.0.0",
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "firmware/boot.bin",
+          "offset": 0
+        },
+        {
+          "path": "firmware/app.bin",
+          "offset": 57344
+        }
+      ]
+    }
+  ]
+}
