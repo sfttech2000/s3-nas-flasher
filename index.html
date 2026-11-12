@@ -119,7 +119,14 @@ footer { font-size: 13px; color: var(--muted); display: grid; gap: 4px; }
     <button class="btn ghost" id="probe">ตรวจการเชื่อมต่อ (ไม่เขียนอะไรลงบอร์ด)</button>
     <div class="bar" aria-hidden="true"><div id="bar"></div></div>
     <p id="status" class="muted">กดปุ่มแล้วเลือกบอร์ด (ชื่อมักเป็น “USB Single Serial”, “CH343” หรือ COM) แล้วกดเชื่อมต่อ</p>
-    <div class="box tip">ใช้เวลาประมาณ 1–2 นาที อย่าถอดสายหรือปิดจอมือถือระหว่างนี้ · ค้างที่ “กำลังเชื่อมต่อ” นาน: กดปุ่ม BOOT ที่บอร์ดค้างไว้แล้วลองใหม่</div>
+    <div class="box tip">ใช้เวลาประมาณ 1–2 นาที (แบบล้างเครื่อง 3–4 นาที) อย่าถอดสายหรือปิดจอมือถือระหว่างนี้
+      <br><b>ค้างที่ “กำลังเชื่อมต่อ” หรือขึ้นสีแดง:</b> ทำให้บอร์ดเข้าโหมดแฟลชด้วยมือ แล้วกดติดตั้งใหม่
+      <ol style="margin-top:4px">
+        <li>กดปุ่ม <b>BOOT</b> บนบอร์ดค้างไว้ (อย่าปล่อย)</li>
+        <li>กดปุ่ม <b>RST</b> แล้วปล่อย 1 ครั้ง</li>
+        <li>ปล่อยปุ่ม <b>BOOT</b></li>
+        <li>รีเฟรชหน้านี้ แล้วกด “เชื่อมต่อบอร์ดและติดตั้ง” ใหม่</li>
+      </ol></div>
     <details><summary>ตั้งค่าขั้นสูง / บันทึกการทำงาน</summary>
       <p style="margin-top:8px">วิธีเชื่อมต่อ <select id="conn"><option value="auto" selected>อัตโนมัติ</option><option value="serial">Web Serial (คอม)</option><option value="usb">WebUSB (มือถือ Android)</option></select> <span id="connnow" class="muted"></span></p>
       <p>ความเร็ว <select id="baud"><option value="460800" selected>460800 (เร็ว)</option><option value="115200">115200 (ถ้าแบบเร็วไม่ผ่าน)</option></select></p>
@@ -266,7 +273,7 @@ $('go').addEventListener('click', async () => {
     log('flash: ' + flash);
     if (!['16MB', '32MB', '64MB', '128MB'].includes(flash)) throw new Error('บอร์ดนี้มี flash ' + flash + ' ต้องเป็น 16MB (N16R8)');
 
-    status(erase ? 'กำลังล้างเครื่องและเขียนเฟิร์มแวร์... อย่าถอดสาย' : 'กำลังเขียนเฟิร์มแวร์... อย่าถอดสาย (ค่า WiFi และรหัสเดิมไม่หาย)');
+    status(erase ? 'กำลังล้าง flash ทั้งหมด 1–2 นาที แถบจะนิ่งที่ 0% จนล้างเสร็จ แล้วค่อยเริ่มเขียน... อย่าถอดสาย' : 'กำลังเขียนเฟิร์มแวร์... อย่าถอดสาย (ค่า WiFi และรหัสเดิมไม่หาย)');
     const total = files.reduce((a, f) => a + f.data.length, 0);
     const before = files.map((f, i) => files.slice(0, i).reduce((a, g) => a + g.data.length, 0));
     await loader.writeFlash({
@@ -347,7 +354,7 @@ $('probe').addEventListener('click', async () => {
     const dlOk = /waiting for download/.test(text);
     await reader.cancel().catch(() => {});
     if (port.rxBytes !== undefined) log(`usb rx ${port.rxBytes} B`);
-    status(normalOk ? (dlOk ? 'อ่านข้อมูลได้ และเข้าโหมดแฟลชได้ พร้อมติดตั้ง' : 'อ่านข้อมูลได้ แต่เข้าโหมดแฟลชเองไม่ได้: กดปุ่ม BOOT ค้างไว้ตอนติดตั้ง')
+    status(normalOk ? (dlOk ? 'อ่านข้อมูลได้ และเข้าโหมดแฟลชได้ พร้อมติดตั้ง' : 'อ่านข้อมูลได้ แต่เข้าโหมดแฟลชเองไม่ได้: กด BOOT ค้าง → กด RST แล้วปล่อย → ปล่อย BOOT แล้วกดติดตั้ง')
                     : 'ไม่ได้รับข้อมูลจากบอร์ด (ดูบันทึกด้านล่าง)', normalOk && dlOk ? 'ok' : 'bad');
   } catch (e) {
     log('ERROR: ' + (e && e.message ? e.message : e));
